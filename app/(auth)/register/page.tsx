@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { registerSchema, type RegisterFormValues } from '@/lib/validations/auth';
+import { registerUser } from '@/lib/api/auth';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,30 +33,11 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormValues) => {
     setServerError(null);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_AUTH_API_URL}/api/v1/auth/register`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email:     data.email,
-            password:  data.password,
-            firstName: data.firstName,
-            lastName:  data.lastName,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({})) as { error?: string; title?: string };
-        setServerError(body?.error ?? body?.title ?? 'No se pudo completar el registro. Intenta de nuevo.');
-        return;
-      }
-
+      await registerUser(data.email, data.password, data.firstName, data.lastName);
       setSuccess(true);
       setTimeout(() => router.push('/login'), 2000);
-    } catch {
-      setServerError('No se pudo conectar con el servidor. Verifica tu conexión.');
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : 'No se pudo conectar con el servidor.');
     }
   };
 

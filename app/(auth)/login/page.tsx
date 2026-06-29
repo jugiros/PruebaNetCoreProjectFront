@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth';
+import { loginUser } from '@/lib/api/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,21 +31,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email, password: data.password }),
-      });
-
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({})) as { title?: string };
-        setServerError(body?.title ?? 'Credenciales incorrectas. Intenta de nuevo.');
-        return;
-      }
-
+      await loginUser(data.email, data.password);
       router.push('/dashboard');
-    } catch {
-      setServerError('No se pudo conectar con el servidor. Verifica tu conexión.');
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : 'No se pudo conectar con el servidor.');
     }
   };
 

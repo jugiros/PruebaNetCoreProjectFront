@@ -23,7 +23,7 @@ export const registerSchema = z
       .string()
       .min(8, 'Mínimo 8 caracteres')
       .regex(/[A-Z]/, 'Debe contener al menos una mayúscula')
-      .regex(/[0-9]/, 'Debe contener al menos un número'),
+      .regex(/\d/, 'Debe contener al menos un número'),
     confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
   })
   .refine((data) => data.password === data.confirmPassword, {
